@@ -4,18 +4,26 @@ from tkinter import filedialog
 import json
 import sys
 
-print("please choose a resolution:")
-print("1 : 800x600")
-print("2 : 1800x1200")
-print("3 : 1800x1440")
+resolution = (800, 600)
 
-resolution_choice = input()
-if resolution_choice == "1":
-    resolution = (800, 600)
-elif resolution_choice == "2":
-    resolution = (1800, 1200)
-elif resolution_choice == "3":
-    resolution = (1800, 1400)
+def print_hi():
+    print("Hi")
+
+if "--help" in sys.argv:
+    print("\nUsage: python3 b2dEditor.py [--help] [--resolution <selection>]\n")
+    print("help:       Prints this help text")
+    print("resolution: Sets application resolution to selected option:")
+    print("     1: 800x600")
+    print("     2: 1200x900")
+    print("     3: 1800x1350")
+    print("\n")
+    sys.exit(0)
+
+if "--resolution" in sys.argv:
+    resolution_arg = sys.argv[sys.argv.index("--resolution") + 1]
+    if resolution_arg == "1": resolution = (800, 600)
+    elif resolution_arg == "2": resolution = (1200, 900)
+    elif resolution_arg == "3": resolution = (1800, 1350)
 
 shapes = []
 current_shape = 0
@@ -24,43 +32,79 @@ shapes.append([])
 
 selected = None
 
+buttons = []
+
 quit = False
 selected = None
 Tk().withdraw()
 
 def dump_node_json():
-    export_file_name = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")], initialdir="~")
-    if export_file_name == "" or export_file_name == ():
-        return
+    if __name__ == "__main__":
+        export_file_name = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")], initialdir="~")
+        if export_file_name == "" or export_file_name == ():
+            return
 
-    json_file = []
+    json_file = {}
 
-    rigidBody = {}
+    rigid_body = {}
     polygons = []
 
     for i in range(len(shapes)):
-        json_file.append([])
         for j in shapes[i]:
 
             pos_dict = {}
 
-            pos_dict["x"] = j.pos[0] / edit_area.rect[3]
-            pos_dict["y"] = j.pos[1] / edit_area.rect[2]
+            pos_dict["x"] = j.pos[0] / edit_area.rect[2]
+            pos_dict["y"] = j.pos[1] / edit_area.rect[3]
             polygons.append([pos_dict])
 
-    rigidBody["polygons"] = polygons
-    json_file.append(rigidBody)
+    origin_pos = {}
+    origin_pos["x"] = origin.pos[0] / edit_area.rect[2]
+    origin_pos["y"] = origin.pos[1] / edit_area.rect[3]
+    rigid_body["origin"] = origin_pos
+    rigid_body["polygons"] = polygons
+    rigid_body["circles"] = []
+    rigid_body["shapes"] = []
+    json_file["rigidBody"] = rigid_body
 
-    with open(export_file_name, "w") as export_file:
-        json.dump(json_file, export_file, indent=2, sort_keys=True)
+    if __name__ == "__main__":
+        with open(export_file_name, "w") as export_file:
+            json.dump(json_file, export_file, indent=2, sort_keys=True)
+    else:
+        return json_file
+
+class Button():
+    def __init__(self, size, pos, command):
+        buttons.append(self)
+        self.rect = pygame.Rect(pos, size)
+        self.command = command
+
+    def handle_mouse(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                print("wasd")
+                if self.rect.collidepoint(event.pos):
+                    exec(self.command)
+
 
 # Define Node class
 class Node():
     def __init__(self):
         self.norm_color = (0, 0, 200)
         self.select_color = (0, 100, 0)
-        self.clicked = False
         self.color = self.norm_color
+        self.pos = (0, 0)
+        self.rect = None
+
+    def set_pos(self, pos):
+        self.pos = pos
+
+    def set_color(self, color):
+        self.color = color
+
+class OriginNode():
+    def __init__(self):
+        self.color = (200, 0, 0)
         self.pos = (0, 0)
         self.rect = None
 
@@ -87,9 +131,11 @@ class NodeRect():
                         # Compare event position to each node's position
                         if i.pos[0] - 5 <= event.pos[0] <= i.pos[0] + 5 and i.pos[1] - 5 <= event.pos[1] <= i.pos[1] + 5:
                         # Set clicked node's color and set it as selected
-                            i.clicked = True
                             selected = i
                             set_current_shape(shapes.index(nodes))
+
+                if origin.pos[0] - 6 <= event.pos[0] <= origin.pos[0] + 6 and origin.pos[1] - 6 <= event.pos[1] <= origin.pos[1] + 6:
+                    selected = origin
 
                 if selected == None:
                     if edit_area.rect.collidepoint(mouse_pos):
@@ -97,6 +143,7 @@ class NodeRect():
 
             # Check if mouse2 (3 in pygame terms) clicked on node
             elif event.button == 3:
+                for nodes in shapes:
                     for i in nodes:
                         # Compare event position to each node's position
                         if i.pos[0] - 5 <= event.pos[0] <= i.pos[0] + 5 and i.pos[1] - 5 <= event.pos[1] <= i.pos[1] + 5:
@@ -134,6 +181,9 @@ screen = pygame.Surface(resolution)
 
 edit_area = NodeRect()
 
+origin = OriginNode()
+origin.set_pos((100, 100))
+
 while not quit:
 
     # Clear the screen
@@ -145,6 +195,8 @@ while not quit:
     for event in pygame.event.get():
 
         edit_area.handle_mouse(event)
+        for button in buttons:
+            button.handle_mouse(event)
         if event.type == pygame.QUIT:
             quit = True
 
@@ -161,6 +213,11 @@ while not quit:
                 #print(current_shape)
                 set_current_shape(len(shapes) - 1)
                 #print(current_shape)
+
+    open_image = Button((80, 80), (resolution[0] - 150, 90), "print_hi()")
+
+    for button in buttons:
+        pygame.draw.rect(screen, (200, 200, 0), button.rect)
 
     #print(len(shapes))
 
@@ -198,6 +255,14 @@ while not quit:
                     node.set_color(node.norm_color)
                 else:
                     node.set_color(node.select_color)
+
+    if origin == selected:
+        pygame.draw.circle(screen, origin.color, origin.pos, 8)
+    else:
+        pygame.draw.circle(screen, origin.color, origin.pos, 4)
+    pygame.draw.circle(screen, origin.color, origin.pos, 8, 2)
+    pygame.draw.line(screen, origin.color, (origin.pos[0] - 10, origin.pos[1] - 1), (origin.pos[0] + 9, origin.pos[1] - 1), 2)
+    pygame.draw.line(screen, origin.color, (origin.pos[0] - 1, origin.pos[1] - 10), (origin.pos[0] - 1, origin.pos[1] + 9), 2)
 
     disp.blit(screen, (0, 0))
 
