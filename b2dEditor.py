@@ -6,10 +6,9 @@ import json
 shapes = []
 current_shape = 0
 
-WinX = 1280
-WinY = 720
-
 shapes.append([])
+
+selected = None
 
 quit = False
 selected = None
@@ -58,33 +57,21 @@ class Node():
         self.color = color
         #print("INFO: Set node ", nodes.index(self), " color to ", self.color)
 
-def set_current_shape(num):
-    global current_shape
-    current_shape = num
+class NodeRect():
+    def __init__(self):
+        self.edge_color = (150, 150, 150)
+        self.color = (250, 250, 250)
+        self.rect = pygame.Rect(50, 50, screen.get_rect()[2] - 100, screen.get_rect()[3] - 100)
 
-def add_node(pos):
-    new_node = Node()
-    new_node.set_pos(pos)
-    shapes[current_shape].append(new_node)
+    def handle_mouse(self, event):
+        global selected
 
-pygame.init()
-screen=pygame.display.set_mode([WinX, WinY], pygame.RESIZABLE)
-
-while not quit:
-    print(pygame.mouse.get_pos())
-
-    # Handle inputs
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            quit = True
-
-        # Check if mouse1 clicked on node
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 for nodes in shapes:
                     for i in nodes:
                         # Compare event position to each node's position
-                        if i.pos[0] - 4 <= event.pos[0] <= i.pos[0] + 4 and i.pos[1] - 4 <= event.pos[1] <= i.pos[1] + 4:
+                        if i.pos[0] - 5 <= event.pos[0] <= i.pos[0] + 5 and i.pos[1] - 5 <= event.pos[1] <= i.pos[1] + 5:
                         # Set clicked node's color and set it as selected
                             i.clicked = True
                             selected = i
@@ -97,14 +84,17 @@ while not quit:
             elif event.button == 3:
                     for i in nodes:
                         # Compare event position to each node's position
-                        if i.pos[0] - 4 <= event.pos[0] <= i.pos[0] + 4 and i.pos[1] - 4 <= event.pos[1] <= i.pos[1] + 4:
+                        if i.pos[0] - 5 <= event.pos[0] <= i.pos[0] + 5 and i.pos[1] - 5 <= event.pos[1] <= i.pos[1] + 5:
                         # Remove clicked node
                             nodes.remove(i)
 
         # Set selected node's position to the mouse's
         elif event.type == pygame.MOUSEMOTION:
             if selected != None:
-                selected.pos = event.pos
+                if edit_area.rect.collidepoint(mouse_pos):
+                    selected.set_pos(event.pos)
+                else: selected = None
+
 
         # De-select node on mouse1 release
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -112,6 +102,32 @@ while not quit:
                 if selected != None:
                     selected.clicked = False
                 selected = None
+
+
+def set_current_shape(num):
+    global current_shape
+    current_shape = num
+
+def add_node(pos):
+    new_node = Node()
+    new_node.set_pos(pos)
+    shapes[current_shape].append(new_node)
+
+pygame.init()
+screen=pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+
+edit_area = NodeRect()
+
+while not quit:
+
+    mouse_pos = pygame.mouse.get_pos()
+
+    # Handle inputs
+    for event in pygame.event.get():
+
+        edit_area.handle_mouse(event)
+        if event.type == pygame.QUIT:
+            quit = True
 
         # Add node if insert is pressed
         elif event.type == pygame.KEYDOWN:
@@ -128,14 +144,18 @@ while not quit:
                 #print(current_shape)
 
         elif event.type == pygame.VIDEORESIZE:
-            if event.w < event.h:
-                event.h = event.w
+            #if event.w < event.h:
+            #    event.h = event.w
             screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+            edit_area.rect = pygame.Rect(25, 25, event.w - 50, event.h - 50)
 
     # Clear the screen
     screen.fill((200, 200, 200))
 
     #print(len(shapes))
+
+    pygame.draw.rect(screen, edit_area.color, edit_area.rect)
+    pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
 
     if len(shapes) > 0:
         # Iterate through nodes to draw them
@@ -158,7 +178,7 @@ while not quit:
                     pygame.draw.line(screen, node.color, nodes[len(nodes) - 1].pos, nodes[0].pos, 2)
 
                 # Draw node circles
-                if node.clicked:
+                if node == selected:
                     pygame.draw.circle(screen, node.color, node.pos, 7)
                 else:
                     pygame.draw.circle(screen, node.color, node.pos, 4)
@@ -168,7 +188,6 @@ while not quit:
                     node.set_color(node.norm_color)
                 else:
                     node.set_color(node.select_color)
-
 
     # Update display
     pygame.display.update()
