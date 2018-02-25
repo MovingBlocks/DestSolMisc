@@ -78,7 +78,8 @@ class NodeRect():
                             set_current_shape(shapes.index(nodes))
 
                 if selected == None:
-                    add_node(event.pos)
+                    if edit_area.rect.collidepoint(mouse_pos):
+                        add_node(event.pos)
 
             # Check if mouse2 (3 in pygame terms) clicked on node
             elif event.button == 3:
@@ -114,11 +115,15 @@ def add_node(pos):
     shapes[current_shape].append(new_node)
 
 pygame.init()
-screen=pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+disp = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+screen = pygame.Surface((800, 600), pygame.RESIZABLE)
 
 edit_area = NodeRect()
 
 while not quit:
+
+    # Clear the screen
+    screen.fill((200, 200, 200))
 
     mouse_pos = pygame.mouse.get_pos()
 
@@ -144,13 +149,9 @@ while not quit:
                 #print(current_shape)
 
         elif event.type == pygame.VIDEORESIZE:
-            if event.w < event.h:
-                event.h = event.w
-            screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            edit_area.rect = pygame.Rect(50, 50, event.h - 100, event.h - 100)
-
-    # Clear the screen
-    screen.fill((200, 200, 200))
+            print("wasd")
+            disp = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+            screen = pygame.transform.scale(screen, event.size)
 
     #print(len(shapes))
 
@@ -188,6 +189,8 @@ while not quit:
                     node.set_color(node.norm_color)
                 else:
                     node.set_color(node.select_color)
+
+    disp.blit(screen, (0, 0))
 
     # Update display
     pygame.display.update()
