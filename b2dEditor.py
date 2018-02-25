@@ -147,7 +147,7 @@ while not quit:
             #if event.w < event.h:
             #    event.h = event.w
             screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            edit_area.rect = pygame.Rect(25, 25, event.w - 50, event.h - 50)
+            edit_area.rect = pygame.Rect(50, 50, event.w - 100, event.w - 100)
 
     # Clear the screen
     screen.fill((200, 200, 200))
