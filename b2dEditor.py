@@ -10,13 +10,12 @@ def print_hi():
     print("Hi")
 
 if "--help" in sys.argv:
-    print("\nUsage: python3 b2dEditor.py [--help] [--resolution <selection>]\n")
-    print("help:       Prints this help text")
-    print("resolution: Sets application resolution to selected option:")
-    print("     1: 800x600")
-    print("     2: 1200x900")
-    print("     3: 1800x1350")
-    print("\n")
+    print("\nUsage: python3 b2dEditor.py [--help] [--resolution <selection>]\n\n"
+          "--help:       Prints this help text\n"
+          "--resolution: Sets application resolution to selected option: \n"
+          "     1: 800x600\n"
+          "     2: 1200x900\n"
+          "     3: 1800x1350\n")
     sys.exit(0)
 
 if "--resolution" in sys.argv:
@@ -29,8 +28,6 @@ shapes = []
 current_shape = 0
 
 shapes.append([])
-
-selected = None
 
 buttons = []
 
@@ -82,7 +79,6 @@ class Button():
     def handle_mouse(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                print("wasd")
                 if self.rect.collidepoint(event.pos):
                     exec(self.command)
 
@@ -113,7 +109,6 @@ class OriginNode():
 
     def set_color(self, color):
         self.color = color
-        #print("INFO: Set node ", nodes.index(self), " color to ", self.color)
 
 class NodeRect():
     def __init__(self):
@@ -210,16 +205,12 @@ while not quit:
 
             elif event.key == pygame.K_n:
                 shapes.append([])
-                #print(current_shape)
                 set_current_shape(len(shapes) - 1)
-                #print(current_shape)
 
     open_image = Button((80, 80), (resolution[0] - 150, 90), "print_hi()")
 
     for button in buttons:
         pygame.draw.rect(screen, (200, 200, 0), button.rect)
-
-    #print(len(shapes))
 
     pygame.draw.rect(screen, edit_area.color, edit_area.rect)
     pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
@@ -250,6 +241,11 @@ while not quit:
                 else:
                     pygame.draw.circle(screen, node.color, node.pos, 4)
                 pygame.draw.circle(screen, node.color, node.pos, 8, 2)
+
+                if node == nodes[len(nodes) - 1]:
+                    pygame.draw.line(screen, node.color, (node.pos[0] - 10, node.pos[1] - 1), (node.pos[0] + 9, node.pos[1] - 1), 2)
+                    pygame.draw.line(screen, node.color, (node.pos[0] - 1, node.pos[1] - 10), (node.pos[0] - 1, node.pos[1] + 9), 2)
+
 
                 if color == 1:
                     node.set_color(node.norm_color)
