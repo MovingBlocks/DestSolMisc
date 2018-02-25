@@ -2,6 +2,20 @@ import pygame
 from tkinter import Tk
 from tkinter import filedialog
 import json
+import sys
+
+print("please choose a resolution:")
+print("1 : 800x600")
+print("2 : 1800x1200")
+print("3 : 1800x1440")
+
+resolution_choice = input()
+if resolution_choice == "1":
+    resolution = (800, 600)
+elif resolution_choice == "2":
+    resolution = (1800, 1200)
+elif resolution_choice == "3":
+    resolution = (1800, 1400)
 
 shapes = []
 current_shape = 0
@@ -30,8 +44,8 @@ def dump_node_json():
 
             pos_dict = {}
 
-            pos_dict["x"] = j.pos[0]
-            pos_dict["y"] = j.pos[1]
+            pos_dict["x"] = j.pos[0] / edit_area.rect[3]
+            pos_dict["y"] = j.pos[1] / edit_area.rect[2]
             polygons.append([pos_dict])
 
     rigidBody["polygons"] = polygons
@@ -61,7 +75,7 @@ class NodeRect():
     def __init__(self):
         self.edge_color = (150, 150, 150)
         self.color = (250, 250, 250)
-        self.rect = pygame.Rect(50, 50, screen.get_rect()[2] - 100, screen.get_rect()[3] - 100)
+        self.rect = pygame.Rect(50, 50, resolution[1] - 100, resolution[1] - 100)
 
     def handle_mouse(self, event):
         global selected
@@ -115,8 +129,8 @@ def add_node(pos):
     shapes[current_shape].append(new_node)
 
 pygame.init()
-disp = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
-screen = pygame.Surface((800, 600), pygame.RESIZABLE)
+disp = pygame.display.set_mode(resolution)
+screen = pygame.Surface(resolution)
 
 edit_area = NodeRect()
 
@@ -147,11 +161,6 @@ while not quit:
                 #print(current_shape)
                 set_current_shape(len(shapes) - 1)
                 #print(current_shape)
-
-        elif event.type == pygame.VIDEORESIZE:
-            print("wasd")
-            disp = pygame.display.set_mode(event.size, pygame.RESIZABLE)
-            screen = pygame.transform.scale(screen, event.size)
 
     #print(len(shapes))
 
