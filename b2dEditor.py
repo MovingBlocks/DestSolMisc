@@ -144,10 +144,10 @@ while not quit:
                 #print(current_shape)
 
         elif event.type == pygame.VIDEORESIZE:
-            #if event.w < event.h:
-            #    event.h = event.w
+            if event.w < event.h:
+                event.h = event.w
             screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-            edit_area.rect = pygame.Rect(50, 50, event.w - 100, event.w - 100)
+            edit_area.rect = pygame.Rect(50, 50, event.h - 100, event.h - 100)
 
     # Clear the screen
     screen.fill((200, 200, 200))
