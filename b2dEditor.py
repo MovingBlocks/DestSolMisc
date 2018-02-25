@@ -6,8 +6,18 @@ import sys
 
 resolution = (800, 600)
 
-def print_hi():
-    print("Hi")
+background = None
+
+def set_background():
+    global background
+
+    image_file_name = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")], initialdir="~")
+    if image_file_name == "" or image_file_name == ():
+        return
+    background = pygame.image.load(image_file_name)
+    background.convert_alpha()
+    background.fill((255, 255, 255, 125), None, pygame.BLEND_RGBA_MULT)
+    background = pygame.transform.scale(background, (edit_area.rect[2] - 50, edit_area.rect[3] - 50))
 
 if "--help" in sys.argv:
     print("\nUsage: python3 b2dEditor.py [--help] [--resolution <selection>]\n\n"
@@ -70,17 +80,38 @@ def dump_node_json():
     else:
         return json_file
 
+button_flag = False
+
 class Button():
-    def __init__(self, size, pos, command):
+    def __init__(self, size, pos, command, text):
         buttons.append(self)
         self.rect = pygame.Rect(pos, size)
         self.command = command
+        self.text = text
+        self.norm_color = (50, 50, 50)
+        self.color = self.norm_color
+        self.hover_color = (100, 100, 100)
+
+    def set_color(self, color):
+        self.color = self.hover_color
 
     def handle_mouse(self, event):
+        global button_flag
+
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            if self.color != self.hover_color:
+                self.set_color(self.hover_color)
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 if self.rect.collidepoint(event.pos):
-                    exec(self.command)
+                    if button_flag == False:
+                        exec(self.command)
+                        button_flag = True
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                button_flag = False
 
 
 # Define Node class
@@ -171,6 +202,8 @@ def add_node(pos):
     shapes[current_shape].append(new_node)
 
 pygame.init()
+pygame.font.init()
+font = pygame.font.SysFont('monospace', 20)
 disp = pygame.display.set_mode(resolution)
 screen = pygame.Surface(resolution)
 
@@ -207,13 +240,18 @@ while not quit:
                 shapes.append([])
                 set_current_shape(len(shapes) - 1)
 
-    open_image = Button((80, 80), (resolution[0] - 150, 90), "print_hi()")
+    open_image = Button((300, 50), (resolution[0] - 400, 90), "set_background()", "Set Background Image")
 
     for button in buttons:
-        pygame.draw.rect(screen, (200, 200, 0), button.rect)
+        print(button.color)
+        pygame.draw.rect(screen, button.color, button.rect)
+        screen.blit(font.render(button.text, False, (200, 200, 200)), (button.rect[0] + 5, button.rect[1] + button.rect[3] / 3))
 
     pygame.draw.rect(screen, edit_area.color, edit_area.rect)
     pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
+
+    if background != None:
+        screen.blit(background, ((0.5 * edit_area.rect.width) - (0.5 * background.get_rect().width) + 50, (0.5 * edit_area.rect.height) - (0.5 * background.get_rect().height) + 50))
 
     if len(shapes) > 0:
         # Iterate through nodes to draw them
