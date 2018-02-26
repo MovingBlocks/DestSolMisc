@@ -204,7 +204,7 @@ def add_node(pos):
 
 pygame.init()
 pygame.font.init()
-font = pygame.font.SysFont('monospace', int(resolution[1] / 47))
+font = pygame.font.Font(pygame.font.match_font("monospace,ubuntumono,liberationmono"), int(resolution[1] / 40))
 disp = pygame.display.set_mode(resolution)
 screen = pygame.Surface(resolution)
 
@@ -212,7 +212,7 @@ edit_area = NodeRect()
 
 origin = OriginNode()
 origin.set_pos((100, 100))
-button_x = resolution[0] / 5
+button_x = resolution[0] / 4
 button_y = resolution[1] / 16
 
 open_image = Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
