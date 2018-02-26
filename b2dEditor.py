@@ -93,14 +93,15 @@ class Button():
         self.hover_color = (100, 100, 100)
 
     def set_color(self, color):
-        self.color = self.hover_color
+        self.color = color
 
     def handle_mouse(self, event):
         global button_flag
 
         if self.rect.collidepoint(pygame.mouse.get_pos()):
-            if self.color != self.hover_color:
-                self.set_color(self.hover_color)
+            self.set_color(self.hover_color)
+        else:
+            self.set_color(self.norm_color)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
@@ -203,7 +204,7 @@ def add_node(pos):
 
 pygame.init()
 pygame.font.init()
-font = pygame.font.SysFont('monospace', 20)
+font = pygame.font.SysFont('monospace', int(resolution[1] / 47))
 disp = pygame.display.set_mode(resolution)
 screen = pygame.Surface(resolution)
 
@@ -211,6 +212,10 @@ edit_area = NodeRect()
 
 origin = OriginNode()
 origin.set_pos((100, 100))
+button_x = resolution[0] / 5
+button_y = resolution[1] / 16
+
+open_image = Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
 
 while not quit:
 
@@ -240,10 +245,8 @@ while not quit:
                 shapes.append([])
                 set_current_shape(len(shapes) - 1)
 
-    open_image = Button((300, 50), (resolution[0] - 400, 90), "set_background()", "Set Background Image")
 
     for button in buttons:
-        print(button.color)
         pygame.draw.rect(screen, button.color, button.rect)
         screen.blit(font.render(button.text, False, (200, 200, 200)), (button.rect[0] + 5, button.rect[1] + button.rect[3] / 3))
 
