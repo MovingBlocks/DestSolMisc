@@ -210,6 +210,8 @@ screen = pygame.Surface(resolution)
 
 edit_area = NodeRect()
 
+ticker = pygame.time.Clock()
+
 origin = OriginNode()
 origin.set_pos((100, 100))
 button_x = resolution[0] / 4
@@ -219,6 +221,7 @@ open_image = Button((button_x, button_y), (resolution[0] - button_x, button_y), 
 
 while not quit:
 
+    ticker.tick(24)
     # Clear the screen
     screen.fill((200, 200, 200))
 
