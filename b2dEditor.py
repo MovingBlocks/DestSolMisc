@@ -6,6 +6,8 @@ import sys
 
 resolution = (800, 600)
 
+return_json = ""
+
 background = None
 
 def set_background():
@@ -46,6 +48,7 @@ selected = None
 Tk().withdraw()
 
 def dump_node_json():
+    global return_json, quit
     if __name__ == "__main__":
         export_file_name = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")], initialdir="~")
         if export_file_name == "" or export_file_name == ():
@@ -78,7 +81,8 @@ def dump_node_json():
         with open(export_file_name, "w") as export_file:
             json.dump(json_file, export_file, indent=2, sort_keys=True)
     else:
-        return json_file
+        return_json = json_file
+        quit = True
 
 button_flag = False
 
@@ -313,3 +317,4 @@ while not quit:
 
     # Update display
     pygame.display.update()
+pygame.quit()
