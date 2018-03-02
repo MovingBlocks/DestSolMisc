@@ -306,6 +306,31 @@ class Application(tkinter.Frame):
         self.load_b2d_json_label.grid(row=0, column=0)
 
         tkinter.Button(load_b2d_json_frame, text="Load b2d file", command=loadB2DFile).grid(row=0, column=1)
+        create_b2d_json_frame = tkinter.Frame(left_column, width=400,
+                                         borderwidth=1, relief="ridge")
+        create_b2d_json_frame.grid(row=8, column=0, sticky=sticky_we, padx=1, pady=1)
+
+        create_b2d_json_label = tkinter.Label(create_b2d_json_frame, text="Create a new b2d body mesh")
+        create_b2d_json_label.grid(row=0, column=0)
+
+        tkinter.Button(create_b2d_json_frame, text="Create b2d file", command=self.create_b2d_json).grid(row=0, column=1)
+
+    def create_b2d_json(self):
+        global b2d_file
+        import importlib
+        import sys
+        skip_reload = False
+        if "b2dEditor" not in sys.modules:
+            skip_reload = True
+        import b2dEditor
+        print("Ha")
+        if not skip_reload:
+            print("Hu")
+            importlib.reload(b2dEditor)
+        print("Ho")
+        b2d_file = b2dEditor.return_json
+        self.load_b2d_json_label["text"] = "Open b2d file to use for physics,\none is already loaded"
+
 
     # other widgets
 
