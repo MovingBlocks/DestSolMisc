@@ -202,6 +202,10 @@ def add_node(pos):
     new_node.set_pos(pos)
     shapes[current_shape].append(new_node)
 
+def add_shape():
+    shapes.append([])
+    set_current_shape(len(shapes) - 1)
+
 pygame.init()
 pygame.font.init()
 font = pygame.font.Font(pygame.font.match_font("monospace,ubuntumono,liberationmono"), int(resolution[1] / 40))
@@ -218,6 +222,8 @@ button_x = resolution[0] / 4
 button_y = resolution[1] / 16
 
 open_image = Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
+save = Button((button_x, button_y), (resolution[0] - button_x, button_y * 2.1), "dump_node_json()", "Save JSON")
+add_obj = Button((button_x, button_y), (resolution[0] - button_x, button_y * 3.2), "add_shape()", "Add Object")
 
 while not quit:
 
@@ -245,8 +251,7 @@ while not quit:
                 dump_node_json()
 
             elif event.key == pygame.K_n:
-                shapes.append([])
-                set_current_shape(len(shapes) - 1)
+                add_shape()
 
 
     for button in buttons:
