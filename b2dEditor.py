@@ -210,111 +210,110 @@ def add_shape():
     shapes.append([])
     set_current_shape(len(shapes) - 1)
 
-pygame.init()
-pygame.font.init()
-font = pygame.font.Font(pygame.font.match_font("monospace,ubuntumono,liberationmono"), int(resolution[1] / 40))
-disp = pygame.display.set_mode(resolution)
-screen = pygame.Surface(resolution)
 
-edit_area = NodeRect()
+def run():
+    global edit_area, origin, mouse_pos, quit
+    pygame.init()
+    pygame.font.init()
+    font = pygame.font.Font(pygame.font.match_font("monospace,ubuntumono,liberationmono"), int(resolution[1] / 40))
+    disp = pygame.display.set_mode(resolution)
+    screen = pygame.Surface(resolution)
+    edit_area = NodeRect()
+    ticker = pygame.time.Clock()
+    origin = OriginNode()
+    origin.set_pos((100, 100))
+    button_x = resolution[0] / 4
+    button_y = resolution[1] / 16
+    Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
+    Button((button_x, button_y), (resolution[0] - button_x, button_y * 2.1), "dump_node_json()", "Save JSON")
+    Button((button_x, button_y), (resolution[0] - button_x, button_y * 3.2), "add_shape()", "Add Object")
+    while not quit:
 
-ticker = pygame.time.Clock()
+        ticker.tick(24)
+        # Clear the screen
+        screen.fill((200, 200, 200))
 
-origin = OriginNode()
-origin.set_pos((100, 100))
-button_x = resolution[0] / 4
-button_y = resolution[1] / 16
+        mouse_pos = pygame.mouse.get_pos()
 
-open_image = Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
-save = Button((button_x, button_y), (resolution[0] - button_x, button_y * 2.1), "dump_node_json()", "Save JSON")
-add_obj = Button((button_x, button_y), (resolution[0] - button_x, button_y * 3.2), "add_shape()", "Add Object")
+        # Handle inputs
+        for event in pygame.event.get():
 
-while not quit:
+            edit_area.handle_mouse(event)
+            for button in buttons:
+                button.handle_mouse(event)
+            if event.type == pygame.QUIT:
+                quit = True
 
-    ticker.tick(24)
-    # Clear the screen
-    screen.fill((200, 200, 200))
+            # Add node if insert is pressed
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_INSERT:
+                    add_node((10, 10))
 
-    mouse_pos = pygame.mouse.get_pos()
+                elif event.key == pygame.K_s:
+                    dump_node_json()
 
-    # Handle inputs
-    for event in pygame.event.get():
+                elif event.key == pygame.K_n:
+                    add_shape()
 
-        edit_area.handle_mouse(event)
         for button in buttons:
-            button.handle_mouse(event)
-        if event.type == pygame.QUIT:
-            quit = True
+            pygame.draw.rect(screen, button.color, button.rect)
+            screen.blit(font.render(button.text, False, (200, 200, 200)), (button.rect[0] + 5, button.rect[1] + button.rect[3] / 3))
 
-        # Add node if insert is pressed
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_INSERT:
-                add_node((10, 10))
+        pygame.draw.rect(screen, edit_area.color, edit_area.rect)
+        pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
 
-            elif event.key == pygame.K_s:
-                dump_node_json()
+        if background != None:
+            screen.blit(background, ((0.5 * edit_area.rect.width) - (0.5 * background.get_rect().width) + 50, (0.5 * edit_area.rect.height) - (0.5 * background.get_rect().height) + 50))
 
-            elif event.key == pygame.K_n:
-                add_shape()
+        if len(shapes) > 0:
+            # Iterate through nodes to draw them
+            for j in range(len(shapes)):
+                nodes = shapes[j]
 
-
-    for button in buttons:
-        pygame.draw.rect(screen, button.color, button.rect)
-        screen.blit(font.render(button.text, False, (200, 200, 200)), (button.rect[0] + 5, button.rect[1] + button.rect[3] / 3))
-
-    pygame.draw.rect(screen, edit_area.color, edit_area.rect)
-    pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
-
-    if background != None:
-        screen.blit(background, ((0.5 * edit_area.rect.width) - (0.5 * background.get_rect().width) + 50, (0.5 * edit_area.rect.height) - (0.5 * background.get_rect().height) + 50))
-
-    if len(shapes) > 0:
-        # Iterate through nodes to draw them
-        for j in range(len(shapes)):
-            nodes = shapes[j]
-
-            if j != current_shape:
-                color = 1
-            else:
-                color = 0
-
-            for i in range(len(nodes)):
-                node = nodes[i]
-                # Draw line between current and previous node if node is not the first one
-                if i > 0:
-                    pygame.draw.line(screen, node.color, node.pos, nodes[i - 1].pos, 2)
-
-                # Draw line between last and first node
-                if len(nodes) > 0 and i == len(nodes) - 1:
-                    pygame.draw.line(screen, node.color, nodes[len(nodes) - 1].pos, nodes[0].pos, 2)
-
-                # Draw node circles
-                if node == selected:
-                    pygame.draw.circle(screen, node.color, node.pos, 7)
+                if j != current_shape:
+                    color = 1
                 else:
-                    pygame.draw.circle(screen, node.color, node.pos, 4)
-                pygame.draw.circle(screen, node.color, node.pos, 8, 2)
+                    color = 0
 
-                if node == nodes[len(nodes) - 1]:
-                    pygame.draw.line(screen, node.color, (node.pos[0] - 10, node.pos[1] - 1), (node.pos[0] + 9, node.pos[1] - 1), 2)
-                    pygame.draw.line(screen, node.color, (node.pos[0] - 1, node.pos[1] - 10), (node.pos[0] - 1, node.pos[1] + 9), 2)
+                for i in range(len(nodes)):
+                    node = nodes[i]
+                    # Draw line between current and previous node if node is not the first one
+                    if i > 0:
+                        pygame.draw.line(screen, node.color, node.pos, nodes[i - 1].pos, 2)
 
+                    # Draw line between last and first node
+                    if len(nodes) > 0 and i == len(nodes) - 1:
+                        pygame.draw.line(screen, node.color, nodes[len(nodes) - 1].pos, nodes[0].pos, 2)
 
-                if color == 1:
-                    node.set_color(node.norm_color)
-                else:
-                    node.set_color(node.select_color)
+                    # Draw node circles
+                    if node == selected:
+                        pygame.draw.circle(screen, node.color, node.pos, 7)
+                    else:
+                        pygame.draw.circle(screen, node.color, node.pos, 4)
+                    pygame.draw.circle(screen, node.color, node.pos, 8, 2)
 
-    if origin == selected:
-        pygame.draw.circle(screen, origin.color, origin.pos, 8)
-    else:
-        pygame.draw.circle(screen, origin.color, origin.pos, 4)
-    pygame.draw.circle(screen, origin.color, origin.pos, 8, 2)
-    pygame.draw.line(screen, origin.color, (origin.pos[0] - 10, origin.pos[1] - 1), (origin.pos[0] + 9, origin.pos[1] - 1), 2)
-    pygame.draw.line(screen, origin.color, (origin.pos[0] - 1, origin.pos[1] - 10), (origin.pos[0] - 1, origin.pos[1] + 9), 2)
+                    if node == nodes[len(nodes) - 1]:
+                        pygame.draw.line(screen, node.color, (node.pos[0] - 10, node.pos[1] - 1), (node.pos[0] + 9, node.pos[1] - 1), 2)
+                        pygame.draw.line(screen, node.color, (node.pos[0] - 1, node.pos[1] - 10), (node.pos[0] - 1, node.pos[1] + 9), 2)
 
-    disp.blit(screen, (0, 0))
+                    if color == 1:
+                        node.set_color(node.norm_color)
+                    else:
+                        node.set_color(node.select_color)
 
-    # Update display
-    pygame.display.update()
-pygame.quit()
+        if origin == selected:
+            pygame.draw.circle(screen, origin.color, origin.pos, 8)
+        else:
+            pygame.draw.circle(screen, origin.color, origin.pos, 4)
+        pygame.draw.circle(screen, origin.color, origin.pos, 8, 2)
+        pygame.draw.line(screen, origin.color, (origin.pos[0] - 10, origin.pos[1] - 1), (origin.pos[0] + 9, origin.pos[1] - 1), 2)
+        pygame.draw.line(screen, origin.color, (origin.pos[0] - 1, origin.pos[1] - 10), (origin.pos[0] - 1, origin.pos[1] + 9), 2)
+
+        disp.blit(screen, (0, 0))
+
+        # Update display
+        pygame.display.update()
+    pygame.quit()
+
+if __name__ == '__main__':
+    run()

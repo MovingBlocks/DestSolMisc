@@ -317,18 +317,11 @@ class Application(tkinter.Frame):
 
     def create_b2d_json(self):
         global b2d_file
-        import importlib
-        import sys
-        skip_reload = False
-        if "b2dEditor" not in sys.modules:
-            skip_reload = True
         import b2dEditor
-        print("Ha")
-        if not skip_reload:
-            print("Hu")
-            importlib.reload(b2dEditor)
-        print("Ho")
+
+        b2dEditor.run()
         b2d_file = b2dEditor.return_json
+        b2dEditor.quit = False
         self.load_b2d_json_label["text"] = "Open b2d file to use for physics,\none is already loaded"
 
 
