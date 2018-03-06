@@ -60,13 +60,17 @@ def dump_node_json():
     polygons = []
 
     for i in range(len(shapes)):
+        pos_root_list = []
         for j in shapes[i]:
 
             pos_dict = {}
 
             pos_dict["x"] = j.pos[0] / edit_area.rect[2]
             pos_dict["y"] = j.pos[1] / edit_area.rect[3]
-            polygons.append([pos_dict])
+
+            pos_root_list.append(pos_dict)
+
+        polygons.append([pos_root_list])
 
     origin_pos = {}
     origin_pos["x"] = origin.pos[0] / edit_area.rect[2]
@@ -83,6 +87,25 @@ def dump_node_json():
     else:
         return_json = json_file
         quit = True
+
+def load_node_json():
+    import_file_name = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")], initialdir="~")
+    if import_file_name == "" or import_file_name == ():
+        return
+
+    with open(import_file_name, "r") as import_file:
+        json_file = json.load(import_file)
+
+
+    for i in json_file["rigidBody"]["polygons"]:
+        for j in i:
+            for k in j:
+                x = int(k["x"] * edit_area.rect[2])
+                y = int(k["y"] * edit_area.rect[3])
+                add_node((x, y))
+        add_shape()
+
+    origin.set_pos((int(json_file["rigidBody"]["origin"]["x"] * edit_area.rect[2]), int(json_file["rigidBody"]["origin"]["y"] * edit_area.rect[3])))
 
 button_flag = False
 
@@ -226,7 +249,9 @@ def run():
     button_y = resolution[1] / 16
     Button((button_x, button_y), (resolution[0] - button_x, button_y), "set_background()", "Set Background Image")
     Button((button_x, button_y), (resolution[0] - button_x, button_y * 2.1), "dump_node_json()", "Save JSON")
-    Button((button_x, button_y), (resolution[0] - button_x, button_y * 3.2), "add_shape()", "Add Object")
+    Button((button_x, button_y), (resolution[0] - button_x, button_y * 3.2), "load_node_json()", "Load JSON")
+    Button((button_x, button_y), (resolution[0] - button_x, button_y * 4.3), "add_shape()", "Add Object")
+    Button((button_x, button_y), (resolution[0] - button_x, resolution[1] - button_y * 2), "exit()", "Exit")
     while not quit:
 
         ticker.tick(24)
@@ -251,6 +276,9 @@ def run():
 
                 elif event.key == pygame.K_s:
                     dump_node_json()
+
+                elif event.key == pygame.K_l:
+                    load_node_json()
 
                 elif event.key == pygame.K_n:
                     add_shape()
