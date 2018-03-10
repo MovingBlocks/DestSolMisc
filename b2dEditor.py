@@ -105,7 +105,8 @@ class NodeRect:
                 if edit_area.rect.collidepoint(mouse_pos):
                     selected.set_pos(event.pos)
 
-                else: selected = None
+                else:
+                    selected = None
 
         # Reset selection on mouse release
         elif event.type == pygame.MOUSEBUTTONUP:
