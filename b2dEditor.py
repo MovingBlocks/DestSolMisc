@@ -19,10 +19,8 @@ class Button:
         self.color = self.norm_color
         self.hover_color = (100, 100, 100)
 
-
     def set_color(self, color):
         self.color = color
-
 
     def handle_mouse(self, event):
         global button_flag
@@ -37,7 +35,7 @@ class Button:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 if self.rect.collidepoint(event.pos):
-                    if button_flag == False:
+                    if not button_flag:
                         exec(self.command)
                         button_flag = True
 
@@ -56,10 +54,8 @@ class Node:
         self.pos = (0, 0)
         self.rect = None
 
-
     def set_pos(self, pos):
         self.pos = pos
-
 
     def set_color(self, color):
         self.color = color
@@ -70,7 +66,6 @@ class NodeRect:
         self.edge_color = (150, 150, 150)
         self.color = (250, 250, 250)
         self.rect = pygame.Rect(50, 50, resolution[1] - 100, resolution[1] - 100)
-
 
     def handle_mouse(self, event):
         global selected
@@ -91,7 +86,7 @@ class NodeRect:
                     selected = origin
 
                 # Add a new node if user clicks ouside of other ones
-                if selected == None:
+                if not selected:
                     if edit_area.rect.collidepoint(mouse_pos):
                         add_node(event.pos)
 
@@ -106,7 +101,7 @@ class NodeRect:
 
         # Set selected node's position to the mouse position
         elif event.type == pygame.MOUSEMOTION:
-            if selected != None:
+            if selected:
                 if edit_area.rect.collidepoint(mouse_pos):
                     selected.set_pos(event.pos)
 
@@ -115,7 +110,7 @@ class NodeRect:
         # Reset selection on mouse release
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                if selected != None:
+                if selected:
                     selected.clicked = False
 
                 selected = None
@@ -150,22 +145,18 @@ quit = False
 selected = None
 Tk().withdraw()
 
-
 def set_current_shape(num):
     global current_shape
     current_shape = num
-
 
 def add_node(pos):
     new_node = Node()
     new_node.set_pos(pos)
     shapes[current_shape].append(new_node)
 
-
 def add_shape():
     shapes.append([])
     set_current_shape(len(shapes) - 1)
-
 
 def set_background():
     """Sets a background image for the editor.
@@ -183,7 +174,6 @@ def set_background():
 
     # Set the background
     background = pygame.transform.scale(background, (edit_area.rect[2] - 50, edit_area.rect[3] - 50))
-
 
 def dump_node_json():
     """Dumps and exports the nodes into a JSON.
@@ -238,7 +228,6 @@ def dump_node_json():
         return_json = json_file
         quit = True
 
-
 def load_node_json():
     """Loads nodes and shapes from a JSON file.
 
@@ -262,7 +251,6 @@ def load_node_json():
         add_shape()
 
     origin.set_pos((int(json_file["rigidBody"]["origin"]["x"] * edit_area.rect[2]), int(json_file["rigidBody"]["origin"]["y"] * edit_area.rect[3])))
-
 
 def run():
     global edit_area, origin, mouse_pos, quit, button_flag
@@ -333,7 +321,7 @@ def run():
         pygame.draw.rect(screen, edit_area.edge_color, edit_area.rect, 2)
 
         # Draw background image
-        if background != None:
+        if background:
             screen.blit(background, ((0.5 * edit_area.rect.width) - (0.5 * background.get_rect().width) + 50, (0.5 * edit_area.rect.height) - (0.5 * background.get_rect().height) + 50))
 
         if len(shapes) > 0:
@@ -398,7 +386,6 @@ def run():
         pygame.display.update()
 
     pygame.quit()
-
 
 if __name__ == '__main__':
     run()
