@@ -145,6 +145,51 @@ quit = False
 selected = None
 Tk().withdraw()
 
+def draw_nodes(screen):
+    if len(shapes) > 0:
+        # Iterate through shapes
+        for shape in range(len(shapes)):
+            nodes = shapes[shape]
+
+            # Set current shape color to green
+            if shape != current_shape:
+                color = 1
+            else:
+                color = 0
+
+            # Iterate through nodes and draw them
+            for i in range(len(nodes)):
+                node = nodes[i]
+
+                # Draw line between current and previous node if node is not the first one
+                if i > 0:
+                    pygame.draw.line(screen, node.color, node.pos, nodes[i - 1].pos, 2)
+
+                # Draw line between last and first node
+                if len(nodes) > 0 and i == len(nodes) - 1:
+                    pygame.draw.line(screen, node.color, nodes[len(nodes) - 1].pos, nodes[0].pos, 2)
+
+                # Draw node circles
+                if node == selected:
+                    pygame.draw.circle(screen, node.color, node.pos, 7)
+
+                else:
+                    pygame.draw.circle(screen, node.color, node.pos, 4)
+
+                pygame.draw.circle(screen, node.color, node.pos, 8, 2)
+
+                # Draw indicator lines on last node circle
+                if node == nodes[len(nodes) - 1]:
+                    pygame.draw.line(screen, node.color, (node.pos[0] - 10, node.pos[1] - 1), (node.pos[0] + 9, node.pos[1] - 1), 2)
+                    pygame.draw.line(screen, node.color, (node.pos[0] - 1, node.pos[1] - 10), (node.pos[0] - 1, node.pos[1] + 9), 2)
+
+                # Set node colors
+                if color == 1:
+                    node.set_color(node.norm_color)
+
+                else:
+                    node.set_color(node.select_color)
+
 def set_current_shape(num):
     global current_shape
     current_shape = num
@@ -159,8 +204,8 @@ def add_shape():
     set_current_shape(len(shapes) - 1)
 
 def set_background():
-    """Sets a background image for the editor.
-
+    """
+    Sets a background image for the editor.
     """
     global background
 
@@ -176,11 +221,11 @@ def set_background():
     background = pygame.transform.scale(background, (edit_area.rect[2] - 50, edit_area.rect[3] - 50))
 
 def dump_node_json():
-    """Dumps and exports the nodes into a JSON.
+    """
+    Dumps and exports the nodes into a JSON.
 
     Returns:
         A JSON object if application is not ran as stand-alone, otherwise returns nothing.
-
     """
     global return_json, quit
 
@@ -229,8 +274,8 @@ def dump_node_json():
         quit = True
 
 def load_node_json():
-    """Loads nodes and shapes from a JSON file.
-
+    """
+    Loads nodes and shapes from a JSON file.
     """
     # Select the file to import
     import_file_name = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")], initialdir="~")
@@ -251,6 +296,29 @@ def load_node_json():
         add_shape()
 
     origin.set_pos((int(json_file["rigidBody"]["origin"]["x"] * edit_area.rect[2]), int(json_file["rigidBody"]["origin"]["y"] * edit_area.rect[3])))
+
+def handle_inputs():
+    # Handle inputs
+    for event in pygame.event.get():
+
+        edit_area.handle_mouse(event)
+        for button in buttons:
+            button.handle_mouse(event)
+        if event.type == pygame.QUIT:
+            quit = True
+
+        elif event.type == pygame.KEYDOWN:
+            # Save if s is pressed
+            if event.key == pygame.K_s:
+                dump_node_json()
+
+            # Load if l is pressed
+            elif event.key == pygame.K_l:
+                load_node_json()
+
+            # Add shape if insert is pressed
+            elif event.key == pygame.K_INSERT:
+                add_shape()
 
 def run():
     global edit_area, origin, mouse_pos, quit, button_flag
@@ -284,27 +352,7 @@ def run():
 
         mouse_pos = pygame.mouse.get_pos()
 
-        # Handle inputs
-        for event in pygame.event.get():
-
-            edit_area.handle_mouse(event)
-            for button in buttons:
-                button.handle_mouse(event)
-            if event.type == pygame.QUIT:
-                quit = True
-
-            elif event.type == pygame.KEYDOWN:
-                # Save if s is pressed
-                if event.key == pygame.K_s:
-                    dump_node_json()
-
-                # Load if l is pressed
-                elif event.key == pygame.K_l:
-                    load_node_json()
-
-                # Add shape if insert is pressed
-                elif event.key == pygame.K_INSERT:
-                    add_shape()
+        handle_inputs()
 
         # Draw all buttons
         for button in buttons:
@@ -324,49 +372,7 @@ def run():
         if background:
             screen.blit(background, ((0.5 * edit_area.rect.width) - (0.5 * background.get_rect().width) + 50, (0.5 * edit_area.rect.height) - (0.5 * background.get_rect().height) + 50))
 
-        if len(shapes) > 0:
-            # Iterate through shapes
-            for shape in range(len(shapes)):
-                nodes = shapes[shape]
-
-                # Set current shape color to green
-                if shape != current_shape:
-                    color = 1
-                else:
-                    color = 0
-
-                # Iterate through nodes and draw them
-                for i in range(len(nodes)):
-                    node = nodes[i]
-
-                    # Draw line between current and previous node if node is not the first one
-                    if i > 0:
-                        pygame.draw.line(screen, node.color, node.pos, nodes[i - 1].pos, 2)
-
-                    # Draw line between last and first node
-                    if len(nodes) > 0 and i == len(nodes) - 1:
-                        pygame.draw.line(screen, node.color, nodes[len(nodes) - 1].pos, nodes[0].pos, 2)
-
-                    # Draw node circles
-                    if node == selected:
-                        pygame.draw.circle(screen, node.color, node.pos, 7)
-
-                    else:
-                        pygame.draw.circle(screen, node.color, node.pos, 4)
-
-                    pygame.draw.circle(screen, node.color, node.pos, 8, 2)
-
-                    # Draw indicator lines on last node circle
-                    if node == nodes[len(nodes) - 1]:
-                        pygame.draw.line(screen, node.color, (node.pos[0] - 10, node.pos[1] - 1), (node.pos[0] + 9, node.pos[1] - 1), 2)
-                        pygame.draw.line(screen, node.color, (node.pos[0] - 1, node.pos[1] - 10), (node.pos[0] - 1, node.pos[1] + 9), 2)
-
-                    # Set node colors
-                    if color == 1:
-                        node.set_color(node.norm_color)
-
-                    else:
-                        node.set_color(node.select_color)
+        draw_nodes(screen)
 
         # Draw the origin circle
         if origin == selected:
