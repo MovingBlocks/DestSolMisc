@@ -361,9 +361,11 @@ def run():
             screen.blit(font.render(button.text, False, (200, 200, 200)), (button.rect[0] + 5, button.rect[1] + button.rect[3] / 3))
 
         # Draw help text
-        pygame.draw.rect(screen, (50, 50, 50), ((resolution[0] - resolution[0] / 4, resolution[1] / 16 * 5.4), (resolution[0] / 4, font.get_height() * 2)))
-        screen.blit(font.render("Mouse1 : add node", False, (200, 200, 200)), (resolution[0] - resolution[0] / 4 + 5, resolution[1] / 16 * 5.4))
-        screen.blit(font.render("Mouse2 : delete node", False, (200, 200, 200)), (resolution[0] - resolution[0] / 4 + 5, resolution[1] / 16 * 5.4 + font.get_height()))
+        help_position_x = resolution[0] * 0.75
+        help_position_y = resolution[1] - button_y * 3.1
+        pygame.draw.rect(screen, (50, 50, 50), ((help_position_x, help_position_y), (button_x, font.get_height() * 2.1)))
+        screen.blit(font.render("Mouse1: add node", False, (200, 200, 200)), (help_position_x + 5, help_position_y))
+        screen.blit(font.render("Mouse2: remove node", False, (200, 200, 200)), (help_position_x + 5, help_position_y + font.get_height()))
 
         # Draw editing square
         pygame.draw.rect(screen, edit_area.color, edit_area.rect)
